@@ -14,12 +14,14 @@ def run_method(method,seed,generations=6,population_size=6,parent_group_size=2,p
   for agent in population:
    result=evaluate_agent(agent,ordered,store if method=="group" else None)
    agent.update(result["accuracy"]); evaluated.append((agent,result))
+  parents=select_parent_group(population,parent_group_size,performance_weight,novelty_weight) if method=="group" else []
+  for agent,result in evaluated:
    rows.append({"seed":seed,"method":method,"generation":gen,"agent_id":agent.agent_id,
                 "strategy":agent.strategy,"accuracy":result["accuracy"],"solved":result["solved"],
                 "total":result["total"],"unique_behaviours":len({a.strategy for a in population}),
-                "experience_records":len(store.records),"evaluations":(gen+1)*len(problems)})
+                "experience_records":len(store.records),"selected_parent":agent in parents,
+                "evaluations":(gen+1)*len(problems)})
   if method=="group":
-   parents=select_parent_group(population,parent_group_size,performance_weight,novelty_weight)
    for agent,result in evaluated:
     if agent in parents:
      for r in result["records"]:
